@@ -1,0 +1,2 @@
+/usr/bin/ar qc libbezier.a CMakeFiles/bezier.dir/BezierFeatures.cpp.o CMakeFiles/bezier.dir/BezierPreprocessor.cpp.o CMakeFiles/bezier.dir/ExtractBezierFeatures.cpp.o
+/usr/bin/ranlib libbezier.a

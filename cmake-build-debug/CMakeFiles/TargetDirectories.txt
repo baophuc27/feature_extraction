@@ -1,0 +1,9 @@
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/CMakeFiles/bezier_run.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/bezier/CMakeFiles/rebuild_cache.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/bezier/CMakeFiles/edit_cache.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/bezier/CMakeFiles/bezier.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/unit_test/CMakeFiles/edit_cache.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/unit_test/CMakeFiles/rebuild_cache.dir
+/home/phuc/CLionProjects/feature_extraction/cmake-build-debug/unit_test/CMakeFiles/unit_test_run.dir

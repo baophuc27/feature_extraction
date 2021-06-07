@@ -1,0 +1,1 @@
+/usr/bin/c++ -g CMakeFiles/unit_test_run.dir/Test.cpp.o -o unit_test_run  ../bezier/libbezier.a 
