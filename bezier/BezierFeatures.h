@@ -6,6 +6,8 @@
 
 using namespace Eigen;
 
+
+
 class BezierFeatures{
 public:
     BezierFeatures(bool endpoint_distance_vector,
@@ -17,10 +19,10 @@ public:
     };
 
     BezierFeatures(){
-        bool endpoint_distance_vector = true;
-        bool control_endpoint_distance = true;
-        bool angle_between_control_endpoint = true;
-        bool time_coefficient = true;
+        this->endpoint_distance_vector = true;
+        this->control_endpoint_distance = true;
+        this->angle_between_control_endpoint = true;
+        this->time_coefficient = true;
 
         // Plus 1 for pen_up feature
         feature_dimension = endpoint_distance_vector*2 + control_endpoint_distance*2 + angle_between_control_endpoint*2 + time_coefficient*3 + 1;
@@ -43,7 +45,11 @@ public:
     Vector2d get_angle_between_control_endpoint(Vector2d start_point, Vector2d c1, Vector2d c2, Vector2d end_point);
     Vector3d get_time_coefficient(BezierCurve curve);
     VectorXd extract_features(BezierCurve curve);
-    Eigen::Vector2d unit_vector(Eigen::Vector2d vector);
+    static Eigen::Vector2d unit_vector(Eigen::Vector2d vector)
+    {
+        double length = vector.norm();
+        return (length == 0.0) ? vector : (vector / length);
+    }
 
 private:
     bool endpoint_distance_vector;

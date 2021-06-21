@@ -1,7 +1,49 @@
 
 #include "BezierFeatures.h"
-#include "BezierCurve.h"
 
+VectorXd BezierFeatures::extract_features(BezierCurve curve)
+/*
+ *  Extract all features of a given bezier curve, follow this order
+ *  1. Distance feature (2d)
+ *  2. Control endpoint distance feature (2d)
+ *  3. Angle feature (2d)
+ *  4. Time coefficient feature (3d)
+ *  5. Pen up feature (1d)
+ */
+{
+    Matrix4Xd nodes = curve.getNodes();
+    Vector2d start_point = nodes.row(0);
+    Vector2d c1 = nodes.row(1);
+    Vector2d c2 = nodes.row(2);
+    Vector2d end_point = nodes.row(3);
+
+    VectorXd features(feature_dimension);
+
+    Vector2d distance_feature = get_endpoint_distance_vector(start_point,end_point);
+    if (!this->endpoint_distance_vector){
+        distance_feature = Vector2d::Zero();
+    }
+
+    Vector2d control_endpoint_distance_feature = get_control_endpoint_distance(start_point,c1,c2,end_point);
+    if (!this->control_endpoint_distance){
+        control_endpoint_distance_feature = Vector2d::Zero();
+    }
+
+    Vector2d angle_feature = get_angle_between_control_endpoint(start_point,c1,c2,end_point);
+    if (!this->angle_between_control_endpoint){
+        angle_feature = Vector2d::Zero();
+    }
+
+    Vector3d time_feature = get_time_coefficient(curve);
+    if (!this->time_coefficient){
+        time_feature = Vector3d::Zero();
+    }
+
+    double pen_up = (curve.getPenUp() ? 1.0 : 0.0);
+
+    features << distance_feature,control_endpoint_distance_feature,angle_feature,time_feature,pen_up;
+    return features;
+}
 
 Vector2d BezierFeatures::get_endpoint_distance_vector(Vector2d start_point, Vector2d end_point) {
     return end_point - start_point;
@@ -54,42 +96,4 @@ Vector3d BezierFeatures::get_time_coefficient(BezierCurve curve) {
     return time_coefficient_feature;
 }
 
-VectorXd BezierFeatures::extract_features(BezierCurve curve) {
-    // Extract basic information of bezier curve
-    Matrix4Xd nodes = curve.getNodes();
-    Vector2d start_point = nodes.row(0);
-    Vector2d c1 = nodes.row(1);
-    Vector2d c2 = nodes.row(2);
-    Vector2d end_point = nodes.row(3);
 
-    Vector<double,10> features(feature_dimension);
-    if (this->endpoint_distance_vector){
-        Vector2d distance_feature = get_endpoint_distance_vector(start_point,end_point);
-        features << distance_feature;
-    }
-
-    if (this->control_endpoint_distance){
-        Vector2d control_endpoint_distance_feature = get_control_endpoint_distance(start_point,c1,c2,end_point);
-        features << control_endpoint_distance_feature;
-    }
-
-    if (this->angle_between_control_endpoint){
-        Vector2d angle_feature = get_angle_between_control_endpoint(start_point,c1,c2,end_point);
-        features << angle_feature;
-    }
-
-    if (this->time_coefficient){
-        Vector3d time_feature = get_time_coefficient(curve);
-        features << time_feature;
-    }
-
-    features << (curve.getPenUp() ? 1.0 : 0.0);
-
-    return features;
-
-
-}
-Eigen::Vector2d unit_vector(Eigen::Vector2d vector) {
-    double length = vector.norm();
-    return (length == 0.0) ? vector : vector / length;
-}

@@ -12,6 +12,7 @@ private:
     Eigen::Vector4d dt;
     // start_point,c1,c2,end_point. Each point is a 2-d vector.
     Eigen::Matrix<double,4,2> nodes;
+    void evaluate_barycentric(Eigen::Matrix<double,4,2> nodes, double lambda1, double lambda2, Eigen::VectorXd& result);
 public:
     BezierCurve(bool pen_up,
                 Eigen::Vector4d dt,
@@ -37,6 +38,8 @@ public:
     Eigen::Matrix<double,4,2> getNodes(){
         return nodes;
     };
+
+    Eigen::VectorXd evaluate(double s);
 
 };
 #endif //UNITTEST_BEZIERCURVE_H_

@@ -1,11 +1,9 @@
-//
-// Created by phuc on 07/06/2021.
-//
 
 #ifndef FEATURE_EXTRACTION_BEZIERPREPROCESSOR_H
 #define FEATURE_EXTRACTION_BEZIERPREPROCESSOR_H
 #include "BezierCurve.h"
 #include "BezierFeatures.h"
+#include "vector"
 
 class BezierPreprocessor {
 private:
@@ -33,17 +31,16 @@ public:
         this->max_curve_count = 100;
         this->max_updates = 10;
     }
-    BezierFeatures* preprocess(MatrixXd mat);
-    BezierCurve* to_bezier_curves(MatrixXd mat);
-    BezierCurve normalize_curve(BezierCurve* curves,double epsilon = 1e-20);
+    std::vector<VectorXd> preprocess(MatrixXd mat);
+    std::vector<BezierCurve> to_bezier_curves(const Matrix3Xd& mat);
+    static void normalize_curve(std::vector<BezierCurve>& curves,double epsilon = 1e-20);
     BezierCurve fit_curve(MatrixX4d parametrized_points);
-    BezierCurve* fit(MatrixXd offset_points);
-    auto fit_with_error(MatrixXd offset_points);
-    MatrixXd arclength_parametrization(MatrixXd offset_points);
-    MatrixXd uniform_parametrization(MatrixXd offset_points);
-    BezierFeatures* extract_features(BezierCurve* curves);
-
-
+    std::vector<BezierCurve> fit(MatrixXd offset_points);
+    BezierCurve fit_with_error(MatrixXd offset_points,double& error);
+    Matrix4Xd arclength_parametrization(Matrix3Xd offset_points);
+    static Matrix4Xd uniform_parametrization(const Matrix3Xd& offset_points);
+    static std::vector<VectorXd> extract_features(const std::vector<BezierCurve>& curves);
+    static bool is_edge_case(BezierCurve& curve);
 };
 
 

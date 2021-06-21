@@ -7,6 +7,7 @@ set(HEADER_FILES
         ExtractBezierFeatures.h)
 
 set(SOURCE_FILES
+        BezierCurve.cpp
         BezierFeatures.cpp
         BezierPreprocessor.cpp
         ExtractBezierFeatures.cpp)
