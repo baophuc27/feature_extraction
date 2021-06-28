@@ -53,9 +53,8 @@ std::vector<VectorXd> ExtractBezierFeatures::extract(std::vector<Matrix3Xd> stk_
         }
     }
     curves[curves.size()-1].setPenUp(true);
-    LOG(curves.size());
     BezierPreprocessor::normalize_curve(curves);
     std::vector<VectorXd> feats = BezierPreprocessor::extract_features(curves);
-    std::cout << feats[0] << std::endl;
     return feats;
 }
+

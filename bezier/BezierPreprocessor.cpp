@@ -51,7 +51,7 @@ void BezierPreprocessor::fit(Matrix3Xd offset_points,std::vector<BezierCurve>& c
     }
     // Find the point which have maximum error to split CAN BE the better method
     this->fit(offset_points.leftCols(int(total_point/2)+1),curves);
-    this->fit(offset_points.rightCols(int(total_point/2)),curves);
+    this->fit(offset_points.rightCols(int(total_point/2)+1),curves);
 
 
 }
@@ -134,6 +134,24 @@ Matrix4Xd BezierPreprocessor::uniform_parametrization(const Matrix3Xd& offset_po
 void BezierPreprocessor::normalize_curve(std::vector<BezierCurve>& curves, double epsilon) {
     double first_point = curves[0].getNodes()(0,0);
 
+    double minY = findMinY(curves);
+
+    for (BezierCurve& curve: curves){
+        Matrix<double,2,4> diff = Matrix<double,2,4>::Zero();
+        diff.row(0).fill(first_point);
+        diff.row(1).fill(minY);
+        Matrix<double,2,4> newNodes = curve.getNodes() - diff;
+        curve.setNodes(newNodes);
+    }
+
+    double maxY  = findMaxY(curves);
+
+    if (maxY == 0.0) maxY =1.0;
+
+    for (BezierCurve& curve:curves){
+        Matrix<double,2,4> diff = curve.getNodes();
+        curve.setNodes(diff/maxY);
+    }
 }
 
 std::vector<VectorXd> BezierPreprocessor::extract_features(const std::vector<BezierCurve>& curves) {
@@ -247,4 +265,26 @@ double BezierPreprocessor::getMaxError() const {
 
 void BezierPreprocessor::setMaxError(double maxError) {
     max_error = maxError;
+}
+
+double BezierPreprocessor::findMaxY(const std::vector<BezierCurve>& curves) {
+    double maxY = 0.0;
+    for (BezierCurve curve: curves){
+        Matrix<double,2,4> nodes = curve.getNodes();
+        if (nodes.row(1).maxCoeff() > maxY){
+            maxY = nodes.row(1).maxCoeff();
+        }
+    }
+    return maxY;
+}
+
+double BezierPreprocessor::findMinY(std::vector<BezierCurve> curves) {
+    double minY = 0.0;
+    for (BezierCurve curve: curves){
+        Matrix<double,2,4> nodes = curve.getNodes();
+        if (nodes.row(1).minCoeff() < minY){
+            minY = nodes.row(1).minCoeff();
+        }
+    }
+    return minY;
 }

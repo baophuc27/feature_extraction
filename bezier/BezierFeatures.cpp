@@ -1,5 +1,7 @@
 
 #include "BezierFeatures.h"
+#include "iostream"
+#define LOG(x) std::cout<<x<<std::endl
 
 VectorXd BezierFeatures::extract_features(BezierCurve curve)
 /*
@@ -81,9 +83,9 @@ Vector2d BezierFeatures::get_control_endpoint_distance(Vector2d start_point, Vec
 Vector3d BezierFeatures::get_time_coefficient(BezierCurve curve) {
     Vector4d dt = curve.getDt();
     double p1t = dt(0);
-    double t1 = dt(0);
-    double t2 = dt(0);
-    double p3t = dt(0);
+    double t1 = dt(1);
+    double t2 = dt(2);
+    double p3t = dt(3);
 
     double t3 = p3t - p1t;
     double t0 = 0.0;
@@ -92,7 +94,6 @@ Vector3d BezierFeatures::get_time_coefficient(BezierCurve curve) {
     time_coefficient_feature(0) = 3*t1 - t0;
     time_coefficient_feature(1) = 3*t2 - 6*t1 + t0;
     time_coefficient_feature(2) = t3 - 3*t2 + 3*t1 - t0;
-
     return time_coefficient_feature;
 }
 

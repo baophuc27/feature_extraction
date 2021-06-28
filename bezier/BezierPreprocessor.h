@@ -16,6 +16,10 @@ private:
     int max_curve_count;
     int max_updates;
     double lr;
+    static double findMinY(std::vector<BezierCurve> curves);
+    static double findMaxY(const std::vector<BezierCurve>& curves);
+    static bool is_edge_case(BezierCurve& curve);
+    static double determinant(Matrix2d mat);
 public:
     BezierPreprocessor(double max_error,
                        double lamda_error,
@@ -51,8 +55,8 @@ public:
     static Matrix4Xd arclength_parametrization(Matrix3Xd offset_points);
     static Matrix4Xd uniform_parametrization(const Matrix3Xd& offset_points);
     static std::vector<VectorXd> extract_features(const std::vector<BezierCurve>& curves);
-    static bool is_edge_case(BezierCurve& curve);
-    static double determinant(Matrix2d mat);
+
+
 };
 
 
