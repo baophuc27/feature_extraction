@@ -11,11 +11,11 @@ VectorXd BezierFeatures::extract_features(BezierCurve curve)
  *  5. Pen up feature (1d)
  */
 {
-    Matrix4Xd nodes = curve.getNodes();
-    Vector2d start_point = nodes.row(0);
-    Vector2d c1 = nodes.row(1);
-    Vector2d c2 = nodes.row(2);
-    Vector2d end_point = nodes.row(3);
+    Matrix<double,2,4> nodes = curve.getNodes();
+    Vector2d start_point = nodes.col(0);
+    Vector2d c1 = nodes.col(1);
+    Vector2d c2 = nodes.col(2);
+    Vector2d end_point = nodes.col(3);
 
     VectorXd features(feature_dimension);
 
