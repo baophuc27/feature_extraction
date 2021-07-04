@@ -44,6 +44,25 @@ TEST_CASE("Single horizontal curve","[bezier preprocessor]"){
     CHECK(nodes(0,2) - 4.0 < EPSILON);
     CHECK(nodes(0,3) - 6.0 < EPSILON);
 }
+TEST_CASE("Single vertical line","[bezier preprocessor]"){
+    Eigen::Matrix<double,3,5> h_points ;
+    Vector3d p1,p2,p3,p4,p5,p6,p7;
+    p1 << 0,0,0;
+    p2 << 0,1,0;
+    p3 << 0,2,0;
+    p4 << 0,3,0;
+    p5 << 0,5,0;
+    h_points << p1,p2,p3,p4,p5;
+    BezierPreprocessor preprocessor = BezierPreprocessor();
+    std::vector<BezierCurve> curves = preprocessor.to_bezier_curves(h_points);
+
+    CHECK(curves.size() ==1);
+    Eigen::Matrix<double,2,4> nodes =  curves[0].getNodes();
+    CHECK(nodes(0,0) - (0.0) < EPSILON);
+    CHECK(nodes(0,1) - (4/3) < EPSILON);
+    CHECK(nodes(0,2) - (10/3) < EPSILON);
+    CHECK(nodes(0,3) - 5 < EPSILON);
+}
 
 TEST_CASE("Single cubic line","[bezier preprocessor]"){
     Eigen::Matrix<double,3,5> h_points ;

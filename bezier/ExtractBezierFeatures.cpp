@@ -18,7 +18,7 @@ std::vector<VectorXd> ExtractBezierFeatures::extract(std::vector<Matrix3Xd> stk_
  */
 {
     std::vector<BezierCurve> curves;
-    for (int index = 0 ; index <stk_list.size();index++){
+    for (int index = 0 ; index < stk_list.size();index++){
         Matrix3Xd points = stk_list[index];
         points(points.rows()-1,2) = 0;
 
@@ -31,29 +31,30 @@ std::vector<VectorXd> ExtractBezierFeatures::extract(std::vector<Matrix3Xd> stk_
         }
 
         std::vector<BezierCurve> feats = this->preprocessor.to_bezier_curves(points);
-
-        for (const BezierCurve& feat: feats){
+        for (BezierCurve& feat: feats){
             curves.push_back(feat);
         }
 
-        if (index < stk_list.size() -1){
-            Matrix<double,3,2> off_stroke = Matrix<double,3,2>::Zero();
-            Vector3d last_points  = points.col(points.cols() -1);
-            off_stroke(0,0) = last_points(0);
-            off_stroke(1,0) = last_points(1);
-            off_stroke(2,0) = 1.0;
-            Vector3d start_point = stk_list[index +1].col(0);
-            off_stroke(0,1) = start_point(0);
-            off_stroke(1,1) = start_point(1);
-            feats = this->preprocessor.to_bezier_curves(off_stroke);
-
-            for (const BezierCurve& feat: feats){
-                curves.push_back(feat);
-            }
-        }
+//        if (index < stk_list.size() -1){
+//            Matrix3Xd off_stroke = Matrix<double,3,2>::Zero();
+//            Vector3d last_points  = points.col(points.cols() -1);
+//            off_stroke(0,0) = last_points(0);
+//            off_stroke(1,0) = last_points(1);
+//            off_stroke(2,0) = 1.0;
+//            Vector3d start_point = stk_list[index +1].col(0);
+//            off_stroke(0,1) = start_point(0);
+//            off_stroke(1,1) = start_point(1);
+//            feats = this->preprocessor.to_bezier_curves(off_stroke);
+//
+//            for (const BezierCurve& feat: feats){
+//                curves.push_back(feat);
+//            }
+//        }
     }
     curves[curves.size()-1].setPenUp(true);
+    LOG(curves.size());
     BezierPreprocessor::normalize_curve(curves);
+
     std::vector<VectorXd> feats = BezierPreprocessor::extract_features(curves);
     return feats;
 }

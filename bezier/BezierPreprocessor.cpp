@@ -3,14 +3,13 @@
 #include "iostream"
 #define LOG(x) std::cout<<x<<std::endl
 
-std::vector<VectorXd> BezierPreprocessor::preprocess(const MatrixXd& mat)
-
+std::vector<VectorXd> BezierPreprocessor::preprocess(Matrix3Xd& mat)
 {
     std::vector<BezierCurve> bezier_curves = this->to_bezier_curves(mat);
     return BezierPreprocessor::extract_features(bezier_curves);
 }
 
-std::vector<BezierCurve> BezierPreprocessor::to_bezier_curves(const Matrix3Xd& mat)
+std::vector<BezierCurve> BezierPreprocessor::to_bezier_curves(Matrix3Xd &mat)
 /*
  * Produce and prune edge cases of bezier curves
  * @param reference for a list of given points. Each point has 3 dimension (x,y,pen_up)
@@ -19,17 +18,11 @@ std::vector<BezierCurve> BezierPreprocessor::to_bezier_curves(const Matrix3Xd& m
 {
 
     std::vector<BezierCurve> bezier_curves;
-    this->fit(mat,bezier_curves);
-    int num = 0;
+    MatrixXd mat2 = mat;
+//    BezierPreprocessor::normalize_point(mat2);
+    this->fit(mat2,bezier_curves);
     if (bezier_curves.size() > 1){
-        std::vector<BezierCurve> results ;
-        for (BezierCurve curve : bezier_curves){
-            if (curve.getPenUp()) num++;
-            if (BezierPreprocessor::is_edge_case(curve)){
-                results.push_back(curve);
-            }
-        }
-        return results;
+        BezierPreprocessor::prune_edge_case(bezier_curves);
     }
     return bezier_curves;
 }
@@ -49,9 +42,11 @@ void BezierPreprocessor::fit(Matrix3Xd offset_points,std::vector<BezierCurve>& c
         curves.push_back(curve);
         return;
     }
-    // Find the point which have maximum error to split CAN BE the better method
-    this->fit(offset_points.leftCols(int(total_point/2)+1),curves);
-    this->fit(offset_points.rightCols(int(total_point/2)+1),curves);
+    size_t index = curve_with_error.index;
+
+
+    this->fit(offset_points.leftCols(index+1),curves);
+    this->fit(offset_points.rightCols(offset_points.cols() - index),curves);
 
 
 }
@@ -70,17 +65,20 @@ CurveWithError BezierPreprocessor::fit_with_error(const MatrixXd& offset_points)
 
     // No need to check if not curve cause it always generate a curve in any conditions
     double max_curve_error = 0.0;
+    size_t index = 0;
     for (int i = 0 ; i< parametrized_points.cols();i++){
         double s = parametrized_points(3,i);
         VectorXd array_at_t = curve.evaluate(s);
         Vector2d error_offset;
         error_offset<<parametrized_points(0,i),parametrized_points(1,i);
         double error = (array_at_t - error_offset).matrix().norm();
-
-        max_curve_error = (max_curve_error > error) ? max_curve_error : error;
+        if (error > max_curve_error){
+            index = i;
+            max_curve_error = error;
+        }
     }
 
-    return {curve,max_curve_error};
+    return {curve,max_curve_error,index};
 
 }
 
@@ -133,24 +131,23 @@ Matrix4Xd BezierPreprocessor::uniform_parametrization(const Matrix3Xd& offset_po
 
 void BezierPreprocessor::normalize_curve(std::vector<BezierCurve>& curves, double epsilon) {
     double first_point = curves[0].getNodes()(0,0);
-
-    double minY = findMinY(curves);
+    double min_y = find_min_y_of_curves(curves);
+    Vector2d o;
+    o <<first_point,min_y;
 
     for (BezierCurve& curve: curves){
-        Matrix<double,2,4> diff = Matrix<double,2,4>::Zero();
-        diff.row(0).fill(first_point);
-        diff.row(1).fill(minY);
-        Matrix<double,2,4> newNodes = curve.getNodes() - diff;
-        curve.setNodes(newNodes);
+        MatrixXd new_nodes = curve.getNodes();
+        BezierPreprocessor::shift_coordinate(new_nodes,o);
+        curve.setNodes(new_nodes.reshaped(2,4));
     }
 
-    double maxY  = findMaxY(curves);
+    double max_y = find_max_y_of_curves(curves);
 
-    if (maxY == 0.0) maxY =1.0;
+    if (max_y == 0.0) max_y =1.0;
 
     for (BezierCurve& curve:curves){
         Matrix<double,2,4> diff = curve.getNodes();
-        curve.setNodes(diff/maxY);
+        curve.setNodes(diff/max_y);
     }
 }
 
@@ -248,6 +245,63 @@ BezierCurve BezierPreprocessor::fit_curve(Matrix4Xd parametrized_points) const{
     BezierCurve curve = BezierCurve(pen_up,dt,3,nodes);
     return curve;
 }
+
+void BezierPreprocessor::prune_edge_case(std::vector<BezierCurve> &curves) {
+    std::vector<BezierCurve> results ;
+    for (BezierCurve curve : curves){
+        if (BezierPreprocessor::is_edge_case(curve)){
+            results.push_back(curve);
+        }
+    }
+    curves = results;
+}
+
+double BezierPreprocessor::find_max_y_of_curves(const std::vector<BezierCurve> &curves)  {
+    double max_y = 0.0;
+    for (BezierCurve curve: curves){
+        Matrix<double,2,4> nodes = curve.getNodes();
+        double max_y_nodes = BezierPreprocessor::find_max_y(nodes);
+
+        max_y = (max_y_nodes > max_y) ? max_y_nodes : max_y;
+    }
+    return max_y;
+}
+
+double BezierPreprocessor::find_min_y_of_curves(std::vector<BezierCurve> curves)  {
+    double min_y = 0.0;
+    for (BezierCurve curve: curves){
+        Matrix<double,2,4> nodes = curve.getNodes();
+        double min_y_nodes = BezierPreprocessor::find_min_y(nodes);
+
+        min_y = (min_y_nodes < min_y) ? min_y_nodes : min_y;
+    }
+    return min_y;
+}
+
+void BezierPreprocessor::shift_coordinate(MatrixXd &points, Vector2d o)  {
+    MatrixXd diff(points.rows(),points.cols());
+    diff.row(0).fill(o(0));
+    diff.row(1).fill(o(1));
+    points = points - diff;
+}
+
+void BezierPreprocessor::normalize_point(MatrixXd &points) {
+    Vector2d o;
+    o << points(0,0), find_min_y(points);
+    shift_coordinate(points,o);
+    double max_y = find_max_y(points);
+    points = points / max_y;
+}
+double BezierPreprocessor::find_min_y(MatrixXd points) {
+    double min_y = points.row(1).minCoeff();
+    return min_y;
+}
+
+double BezierPreprocessor::find_max_y(MatrixXd points) {
+    double max_y = points.row(1).maxCoeff();
+    return max_y;
+}
+
 double BezierPreprocessor::determinant(Matrix2d mat) {
     return mat(0,0)*mat(1,1) - mat(1,0)*mat(0,1);
 }
@@ -265,26 +319,4 @@ double BezierPreprocessor::getMaxError() const {
 
 void BezierPreprocessor::setMaxError(double maxError) {
     max_error = maxError;
-}
-
-double BezierPreprocessor::findMaxY(const std::vector<BezierCurve>& curves) {
-    double maxY = 0.0;
-    for (BezierCurve curve: curves){
-        Matrix<double,2,4> nodes = curve.getNodes();
-        if (nodes.row(1).maxCoeff() > maxY){
-            maxY = nodes.row(1).maxCoeff();
-        }
-    }
-    return maxY;
-}
-
-double BezierPreprocessor::findMinY(std::vector<BezierCurve> curves) {
-    double minY = 0.0;
-    for (BezierCurve curve: curves){
-        Matrix<double,2,4> nodes = curve.getNodes();
-        if (nodes.row(1).minCoeff() < minY){
-            minY = nodes.row(1).minCoeff();
-        }
-    }
-    return minY;
 }
