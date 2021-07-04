@@ -1,6 +1,5 @@
 # C version of feature extractor
 
-- ***Progress:*** I have implemented and tested my code thoroughly.
 ------------------------------
 
 ## Libraries:
@@ -13,7 +12,6 @@ I have used only one library for implementing, and one for testing on this versi
 - I used unit test for some common cases such as horizontal line, vertical line, cubic line,...
 - I manually tested for another cases by verifying my results on [BEZIER DEMO](https://www.desmos.com/calculator/cahqdxeshd).
 - It also can be used for multiple bezier curves by splitting it into small parts.
-- I think the result can be improved by different splitting method (splitting on maximum error of subsets instead of half splitting).
 ## Testcases:
 I tested this implementation by using some Generate points of character from 0 to 9.
 ### Testcase 0:
