@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/feature_extraction.dir/bezier/BezierFeatures.cpp.o CMakeFiles/feature_extraction.dir/bezier/ExtractBezierFeatures.cpp.o CMakeFiles/feature_extraction.dir/bezier/BezierPreprocessor.cpp.o CMakeFiles/feature_extraction.dir/main.cpp.o CMakeFiles/feature_extraction.dir/test/unit_test/BezierCurveTest.cpp.o -o feature_extraction 
